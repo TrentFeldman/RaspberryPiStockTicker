@@ -1,0 +1,20 @@
+# hub75 LED ticker: data fetcher (tastytrade + wttr.in -> display.txt).
+# Installed by deploy/install.sh. Logs: journalctl -u hub75-fetcher, and
+# logs/fetcher.log in the project folder.
+# @HUB@ and @USER@ are filled in by install.sh.
+[Unit]
+Description=hub75 ticker data fetcher
+Wants=network-online.target
+After=network-online.target time-sync.target
+
+[Service]
+Type=simple
+User=@USER@
+WorkingDirectory=@HUB@/fetcher
+ExecStart=/usr/bin/python3 @HUB@/fetcher/fetcher.py
+Environment=PYTHONUNBUFFERED=1
+Restart=always
+RestartSec=30
+
+[Install]
+WantedBy=multi-user.target

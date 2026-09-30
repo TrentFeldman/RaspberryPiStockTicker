@@ -1,0 +1,13 @@
+# SAMPLE - market hours: one stock at a time, full screen, with stats.
+# NVDA is a big mover (+6.2%, big=1): gold frame and "BIG MOVE".
+# The clock shows bottom right (the "event" is far off, so no CLOSES countdown).
+# Run: ./ticker/ticker --display=ticker/samples/market.txt --stale-after=0
+updated 1
+mode market
+brightness 75
+status ok
+event close 4102444800
+quote AAPL 341.46 1.65 chg=5.54 prev=335.92 open=336.20 lo=335.10 hi=343.00 ylo=169.11 yhi=360.10
+quote MSFT 512.10 -0.31 chg=-1.59 prev=513.69 open=514.00 lo=509.80 hi=516.40 ylo=385.58 yhi=555.45
+quote NVDA 118.02 6.21 chg=6.90 prev=111.12 open=112.10 lo=111.80 hi=118.30 ylo=75.61 yhi=118.60 big=1
+quote BRK.B 498.20 0.00 chg=0.00 prev=498.20 open=498.00 lo=496.10 hi=500.30 ylo=402.00 yhi=520.10

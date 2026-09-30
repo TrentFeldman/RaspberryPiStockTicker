@@ -1,0 +1,21 @@
+# SAMPLE - weekend, a down day and a 7-figure value (tests the fit fallbacks).
+# Weekends: no stocks trade, so the strip is just the weather.
+# Run: ./ticker/ticker --display=ticker/samples/weekend-loss.txt --stale-after=0
+updated 1
+mode weekend
+brightness 70
+status ok
+account 1234567.89 -15321.77 -1.23
+weather {hot}92F {sun}Sunny
+weather {label}Humidity {value}27%
+weather {label}Wind {value}2mph SW
+weather {label}UV {uv-vhigh}8
+weather {label}Today {hot}92{label}/{mild}67F
+weather {label}6pm {hot}87F
+weather {label}9pm {warm}75F {rain}rain 30%
+weather {label}12am {mild}74F
+weather {label}3am {mild}72F
+weather {label}Tomorrow {hot}91{label}/{mild}71F {rain}rain 40%
+weather {label}Sunrise {sunrise}7:30
+weather {label}Sunset {sunset}7:25
+weather {label}Moon {moon}93% Waning Gibbous

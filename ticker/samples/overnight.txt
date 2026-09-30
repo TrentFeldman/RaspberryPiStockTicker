@@ -1,0 +1,14 @@
+# SAMPLE - weeknight 20:00-23:00: dimmed, account on top, strip = 24h stocks + weather.
+# Run: ./ticker/ticker --display=ticker/samples/overnight.txt --stale-after=0
+updated 1
+mode overnight
+brightness 15
+status ok
+account 12345.67 98.76 0.80
+quote AAPL 341.80 1.75
+quote NVDA 118.40 3.20
+quote SPY 772.10 0.64
+weather {cool}58F {sun}Clear
+weather {label}Wind {value}calm
+weather {label}Tomorrow {cold}48{label}/{freeze}31F
+weather {label}Moon {moon}93% Waning Gibbous

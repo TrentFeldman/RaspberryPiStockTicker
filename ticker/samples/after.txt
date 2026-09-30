@@ -1,0 +1,17 @@
+# SAMPLE - after hours: account value pinned on top (made-up numbers).
+# Label row: "ACCOUNT" alternates with "OPENS FRI" (a far-off sample event); clock on the right.
+# Run: ./ticker/ticker --display=ticker/samples/after.txt --stale-after=0
+updated 1
+mode after
+brightness 70
+status ok
+event open 4102444800
+account 12345.67 98.76 0.80
+quote AAPL 341.46 1.65
+quote MSFT 512.10 -0.31
+quote NVDA 118.02 6.21 big=1
+weather {warm}78F {storm}Thundery outbreaks nearby
+weather {label}Feels {hot}86F
+weather {label}Today {hot}88{label}/{mild}70F {rain}rain 60%
+weather {label}6pm {warm}77F {rain}rain 60%
+weather {label}Sunset {sunset}7:25

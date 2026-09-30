@@ -1,0 +1,187 @@
+# hub75 ticker fetcher configuration.
+#
+# The fetcher reads this file at start-up; restart it after editing:
+#   sudo systemctl restart hub75-fetcher
+# Paths are relative to the project folder (absolute paths and ~ work too).
+
+[paths]
+# tastytrade OAuth credentials: two lines, client_secret=... and refresh_token=...
+# Keep this file private (chmod 600). Never commit or share it.
+credentials = "ticker/tastytrade.conf"
+# File the LED ticker reads. Written atomically every refresh.
+display = "ticker/display.txt"
+# Rotating log (1 MB x 5 files). Also mirrored to the systemd journal.
+log_file = "logs/fetcher.log"
+# Test mode: pretend.sh writes this to make the fetcher pretend it's
+# another time of day (see README "Test mode"). Missing file = real time.
+pretend = "pretend.json"
+
+[api]
+base_url = "https://api.tastyworks.com"
+timeout_sec = 15
+
+[symbols]
+# The pool the ticker picks from at random (no repeats until every eligible
+# symbol has been shown). Market hours: everything. Off hours: only
+# the stocks/ETFs that trade 24/5 (tastytrade says which, checked daily).
+# Weekends: none (the strip shows the weather). Order doesn't matter; duplicates are ignored.
+#
+# tastytrade symbology: class B shares use a slash (BRK/B). ETFs are
+# equities to the API; they are listed separately only for readability.
+# Long lists cost nothing extra: only the stock about to be shown is fetched.
+# Symbols tastytrade doesn't know are logged at start-up and never picked
+# (`fetcher.py --check` lists them). Restart the fetcher after editing:
+#   sudo systemctl restart hub75-fetcher
+
+stocks = [
+    # Mega cap / core blue chip
+    "AAPL", "MSFT", "NVDA", "GOOGL", "GOOG", "AMZN", "META", "BRK/B", "AVGO", "TSLA",
+    "JPM", "V", "MA", "WMT", "COST",
+    # Software / cloud / internet
+    "ORCL", "CRM", "NOW", "ADBE", "INTU", "PANW", "CRWD", "SNOW", "DDOG", "NET",
+    "MDB", "SHOP", "UBER", "ABNB", "NFLX", "SPOT", "RDDT",
+    # Semiconductors / compute
+    "AMD", "MU", "QCOM", "TXN", "INTC", "AMAT", "LRCX", "KLAC", "ADI", "MRVL",
+    "ARM", "ASML", "TSM",
+    # Computers / hardware / networking
+    "DELL", "HPE", "HPQ", "CSCO", "ANET", "GLW", "APH",
+    # Financials / banks / payments
+    "BAC", "WFC", "C", "GS", "MS", "AXP", "COF", "BLK", "SCHW", "BK",
+    "USB", "PNC", "TFC", "CME", "ICE", "SPGI", "MCO", "PYPL", "HOOD", "COIN",
+    # Industrial / heavy equipment
+    "CAT", "DE", "GE", "HON", "ETN", "PH", "EMR", "MMM", "ITW", "ROK",
+    "CMI", "PCAR", "URI", "FAST", "CARR", "OTIS",
+    # Defense / aerospace
+    "LMT", "RTX", "NOC", "GD", "LHX", "HII", "BA", "TDG", "HEI", "AXON",
+    # Healthcare / pharma / medtech
+    "LLY", "JNJ", "UNH", "ABBV", "MRK", "AMGN", "PFE", "BMY", "GILD", "TMO",
+    "DHR", "ABT", "MDT", "SYK", "ISRG", "BSX", "VRTX", "REGN",
+    # Consumer / retail
+    "HD", "LOW", "TGT", "TJX", "ROST", "NKE", "LULU", "SBUX", "MCD", "CMG",
+    "YUM", "DPZ", "CAVA", "CROX", "ELF",
+    # Consumer staples
+    "PG", "KO", "PEP", "PM", "MO", "CL", "KMB", "MDLZ", "KHC", "GIS", "KR",
+    # Travel / hotels / entertainment
+    "BKNG", "MAR", "HLT", "RCL", "CCL", "DAL", "UAL", "LUV", "DIS",
+    # Telecom / communications
+    "TMUS", "T", "VZ", "CHTR",
+    # Energy / oil / gas
+    "XOM", "CVX", "COP", "EOG", "OXY", "SLB", "HAL", "MPC", "VLO", "PSX", "KMI", "WMB",
+    # Utilities
+    "NEE", "SO", "DUK", "AEP", "D", "EXC", "SRE",
+    # Materials / mining / chemicals
+    "LIN", "APD", "SHW", "FCX", "NEM", "NUE", "STLD", "DOW", "DD",
+    # Real estate / REITs
+    "PLD", "AMT", "EQIX", "O", "SPG", "WELL", "DLR",
+    # Autos / transportation
+    "F", "GM", "RIVN", "FDX", "UPS", "UNP", "CSX", "NSC",
+    # Higher-growth / mid-cap-ish / more volatile
+    "SOFI", "CELH", "DUOL", "TOST", "DOCS", "HIMS", "IOT", "PATH", "U", "RBLX",
+    "AFRM", "UPST", "CVNA", "CHWY", "DKNG",
+    # Space / new defense / speculative tech
+    "RKLB", "ASTS", "PLTR",
+    # Clean energy / power / nuclear
+    "CEG", "VST", "NRG", "FSLR", "ENPH", "SMR",
+    # Cybersecurity
+    "FTNT", "ZS", "OKTA",
+    # Other well-known names
+    "ADP", "PAYX", "ACN", "IBM", "FIS", "FISV", "ADSK", "WDAY",   # Fiserv: FI -> FISV (moved to Nasdaq)
+]
+
+etfs = [
+    # Major US indexes
+    "SPY", "VOO", "IVV", "VTI", "QQQ", "DIA", "IWM",
+    # Market cap / size
+    "IJH", "MDY", "VO", "VB", "IJR", "SCHA",
+    # Growth / value
+    "VUG", "VTV", "IWF", "IWD", "SCHG", "SCHV",
+    # Dividends / quality
+    "SCHD", "VIG", "VYM", "DGRO", "QUAL",
+    # Nasdaq / tech / semiconductors
+    "QQQM", "XLK", "VGT", "IYW", "SMH", "SOXX",
+    # All 11 S&P sectors (XLK above)
+    "XLC", "XLY", "XLP", "XLE", "XLF", "XLV", "XLI", "XLB", "XLRE", "XLU",
+    # Industry themes
+    "XBI", "IBB", "ITA", "XAR", "KRE", "KBE", "XRT", "IYT",
+    # Cybersecurity / cloud
+    "CIBR", "HACK", "SKYY", "CLOU",
+    # Robotics / AI / innovation
+    "BOTZ", "ROBO", "ARKK",
+    # Clean energy / nuclear / uranium
+    "ICLN", "TAN", "URA", "URNM",
+    # Real estate
+    "VNQ", "IYR",
+    # International
+    "VXUS", "VEA", "VWO", "EFA", "EEM", "EWJ", "EWG", "EWU", "INDA",
+    # Bonds / treasuries
+    "BND", "AGG", "TLT", "IEF", "SHY", "SGOV", "BIL", "JAAA", "HYG", "LQD",
+    # Gold / silver / commodities
+    "GLD", "IAU", "SLV", "PPLT", "DBC", "USO", "UNG",
+    # Bitcoin ETFs
+    "IBIT", "FBTC",
+    # Low vol / factor / alternative weighting
+    "USMV", "SPLV", "RSP", "MTUM", "VLUE",
+    # Covered call / income
+    "JEPI", "JEPQ",
+    # Leveraged / inverse (trading instruments, not long-term holdings)
+    "TQQQ", "SQQQ", "UPRO", "SPXU", "SOXL", "SOXS",
+]
+
+[weather]
+# Weather in the scrolling strip (off hours), from wttr.in: free, no key.
+# location: a city ("Ulaanbaatar"), a US ZIP ("10001") or "lat,lon".
+# Empty = wttr.in guesses from this internet connection's IP address.
+location = ""
+units = "F"            # "F" (Fahrenheit) or "C" (Celsius)
+
+[schedule]
+# All times are local to this timezone. Trading-day open/close (including
+# holidays and early closes) come from the tastytrade sessions API.
+timezone = "America/New_York"
+# Account value is shown from here until the regular open on trading days.
+premarket_start = "06:30"
+# Night: account + strip of weather (+ 24h stocks during an overnight session), dimmed.
+# Applies every day, weekends included.
+night_start = "20:00"
+night_end = "06:30"
+# Sleep: the night-sky screen, from sleep_start until night_end.
+sleep_start = "23:00"
+
+[rotation]
+# Market hours: one random stock fills the panel at a time, for `seconds`
+# each (minimum 5). `lead_sec` before its turn the fetcher picks it and
+# fetches just that one quote: 6 s turns = 10 tiny requests a minute, no
+# matter how long the symbol list is.
+seconds = 6
+lead_sec = 2
+# Off hours: how many random picks the scrolling strip shows. A new set is
+# picked (one request) every quotes_day / quotes_night below.
+strip = 10
+
+[intervals]
+# Seconds between refreshes. Errors back off automatically (5 s doubling,
+# capped at 5 min); auth failures pause tastytrade calls for auth_backoff.
+# New random strip picks (off hours):
+quotes_day = 60        # pre-market / after hours
+quotes_night = 120     # weekend / overnight
+# Account value (net-liq), shown in all off hours:
+account = 120          # pre-market / after hours
+account_quiet = 600    # weekend / overnight: barely moves
+sessions = 600
+weather = 1800         # wttr.in is a free hobby service: every 30 min is plenty
+heartbeat = 600
+auth_backoff = 1800
+instruments = 86400   # daily symbol check: which exist, which trade 24/5
+
+[display]
+brightness_day = 75
+brightness_night = 15
+brightness_sleep = 20
+# Big movers: up or down at least this % today get a gold frame
+# and "BIG MOVE", and come up once more within a few minutes.
+big_move_pct = 5
+
+[pretend]
+# Test mode switches itself off after this long, so the wall display can't
+# get stuck showing a fake time.
+max_minutes = 60

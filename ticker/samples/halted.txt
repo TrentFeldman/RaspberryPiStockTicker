@@ -1,0 +1,8 @@
+# SAMPLE - market hours, a halted stock, and test mode on (TEST badge).
+# Run: ./ticker/ticker --display=ticker/samples/halted.txt --stale-after=0
+updated 1
+mode market
+brightness 75
+status ok
+test Mon 10:00
+quote TSLA 251.77 -6.12 chg=-16.41 prev=268.18 open=265.00 lo=250.10 hi=266.20 ylo=138.80 yhi=488.54 halted=1

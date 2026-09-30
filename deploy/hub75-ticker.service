@@ -1,0 +1,21 @@
+# hub75 LED ticker: panel renderer (reads display.txt, drives the LED matrix).
+# Runs as root for real-time scheduling (smooth scrolling) and GPIO access.
+# Installed by deploy/install.sh (which fills in @HUB@). Logs: journalctl -u hub75-ticker
+[Unit]
+Description=hub75 ticker LED panel
+After=local-fs.target
+
+[Service]
+Type=simple
+WorkingDirectory=@HUB@
+ExecStart=@HUB@/ticker/ticker
+Restart=always
+RestartSec=5
+# Anti-flicker: the LED library always puts its refresh thread (which clocks
+# the S-PWM panel) on CPU 3; this keeps our drawing loop on CPU 2. With
+# isolcpus=...2,3 in /boot/firmware/cmdline.txt (see README "Flicker"), nothing
+# else runs on those two cores, so the panel's timing isn't interrupted.
+CPUAffinity=2
+
+[Install]
+WantedBy=multi-user.target

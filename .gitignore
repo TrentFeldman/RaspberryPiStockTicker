@@ -1,0 +1,13 @@
+# Secrets and machine-local state: these live only on the Pi.
+ticker/tastytrade.conf
+panel.conf
+pretend.json
+ticker/display.txt
+ticker/display.check
+logs/
+
+# Build output
+ticker/ticker
+calibrate
+white_screen
+__pycache__/

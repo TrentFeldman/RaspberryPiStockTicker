@@ -1,0 +1,10 @@
+# SAMPLE - fetcher reporting an auth error; the red "! AUTH ..." alternates
+# with the ACCOUNT label every 3 s.
+# Run: ./ticker/ticker --display=ticker/samples/error.txt --stale-after=0
+updated 1
+mode after
+brightness 70
+status error AUTH 400 invalid_grant
+account 12345.67 na na
+quote AAPL 341.46 1.65
+quote MSFT 512.10 -0.31

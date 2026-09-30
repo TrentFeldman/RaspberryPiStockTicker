@@ -1,0 +1,8 @@
+# SAMPLE - sleep (23:00-06:30): night sky with a waxing gibbous moon.
+# Try other phases: 0.00 new, 0.25 first quarter, 0.50 full, 0.75 last quarter.
+# Run: ./ticker/ticker --display=ticker/samples/sleep.txt --stale-after=0
+updated 1
+mode sleep
+brightness 20
+status ok
+moon 0.35
