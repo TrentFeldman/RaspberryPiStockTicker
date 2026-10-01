@@ -1,0 +1,9 @@
+# hub75 network watchdog: one check, started every 2 minutes by hub75-netwatch.timer.
+# Needs root to restart tailscaled and the Wi-Fi. See deploy/netwatch.sh.
+# Installed by deploy/install.sh (which fills in @HUB@).
+[Unit]
+Description=hub75 network watchdog
+
+[Service]
+Type=oneshot
+ExecStart=@HUB@/deploy/netwatch.sh

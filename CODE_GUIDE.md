@@ -130,6 +130,7 @@ keyboard input for `calibrate`.
 | Night sky | `ticker/src/night_sky.h` |
 | STALE timing | `ticker --stale-after=` (seconds, default 300) |
 | What's on the panel when something breaks | fetcher `app.py` `status_line()`, ticker `health.h` |
+| Self-repair when the network dies | `deploy/netwatch.sh` (a timer from `deploy/`; test: `tests/netwatch_test.sh`) |
 
 After changing code: copy it to the Pi, run `make` and the unit tests (README "Push to the Pi").
 The running services keep the old version until they're restarted

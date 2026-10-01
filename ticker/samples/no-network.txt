@@ -1,0 +1,10 @@
+# SAMPLE - the Pi can't reach the internet and the data is stale: the red
+# "! NO NETWORK 12m" replaces "STALE" in the top label slot.
+# Run: ./ticker/ticker --display=ticker/samples/no-network.txt
+updated 1
+mode after
+brightness 70
+status error NO NETWORK 12m
+account 12345.67 98.76 0.80
+quote AAPL 341.46 1.65
+quote MSFT 512.10 -0.31

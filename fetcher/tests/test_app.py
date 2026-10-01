@@ -71,5 +71,44 @@ class AuthBackoffTests(unittest.TestCase):
         self.assertFalse(any("wttr.in" in u for u in self.calls))
 
 
+class NetworkDownTests(unittest.TestCase):
+    """DNS/connection trouble gets its own panel warning, "NO NETWORK 12m"."""
+
+    def setUp(self):
+        self.real_http_json = web.http_json
+        self.network_up = False
+
+        def fake_http_json(method, url, **kw):
+            if not self.network_up:
+                raise web.ApiError(None, "unreachable", "[Errno -3] Temporary failure in name resolution")
+            return J1 if "wttr.in" in url else {}
+
+        web.http_json = fake_http_json
+        self.fetcher = Fetcher(CFG, Credentials("secret-xyz", "refresh-xyz"))
+        self.fetcher.write_enabled = False
+        self.fetcher.pretend.now = lambda real: (et(2026, 9, 26, 12), False)  # Saturday noon: weather is fetched
+
+    def tearDown(self):
+        web.http_json = self.real_http_json
+
+    def test_warning_after_a_minute_then_clears_on_any_success(self):
+        with self.assertLogs("fetcher", level="WARNING"):
+            self.fetcher.tick()
+        t0 = self.fetcher.net_down_since
+        self.assertIsNotNone(t0)
+        self.assertTrue(self.fetcher.status_line(t0 + 30).startswith("SESSIONS"))  # a blip: still per-source
+        status = self.fetcher.status_line(t0 + 12 * 60)
+        self.assertEqual(status, "NO NETWORK 12m")
+        self.assertLessEqual(len(status), 23)  # fits the panel
+
+        self.network_up = True  # one source succeeding (the weather) proves the network is back
+        for s in self.fetcher.sources.values():
+            s.next_due = 0
+        with self.assertLogs("fetcher", level="ERROR"):  # the other fakes return {}: parse errors, not network
+            self.fetcher.tick()
+        self.assertIsNone(self.fetcher.net_down_since)
+        self.assertFalse(self.fetcher.status_line(t0 + 12 * 60).startswith("NO NETWORK"))
+
+
 if __name__ == "__main__":
     unittest.main()

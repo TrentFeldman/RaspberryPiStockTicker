@@ -44,7 +44,7 @@ market-sessions API, so holidays and early closes are handled automatically.
 - **Overnight prices:** 24h stocks use the bid/ask midpoint, because `last` and `mark` stay frozen overnight.
 - **Weather:** colour-coded, from wttr.in (no API key). It's fetched only while the strip is on
   screen, at most every 30 min.
-- **Health:** errors show on the panel in red: `STALE 12m`, `! AUTH`, `! QUOTES …`, `NO DATA`.
+- **Health:** problems show on the panel in red: `! NO NETWORK 12m`, `STALE 12m`, `! AUTH`, `! QUOTES …`, `NO DATA`.
 
 ## Setup
 
@@ -64,7 +64,9 @@ market-sessions API, so holidays and early closes are handled automatically.
    ```
 7. `python3 fetcher/fetcher.py --check` checks the credentials, the API, the symbols and the weather.
 8. `sudo deploy/install.sh` builds, checks, and installs and starts the `hub75-fetcher` and
-   `hub75-ticker` services. Use `--uninstall` to remove them.
+   `hub75-ticker` services and the network watchdog timer. Use `--uninstall` to remove them.
+9. Optional: keep system logs across reboots, so an outage can be diagnosed after a restart:
+   `sudo mkdir -p /var/log/journal && sudo systemctl restart systemd-journald`.
 
 ### Push to the Pi and build
 
@@ -109,13 +111,14 @@ font sizes. The bundled fonts are in `fonts/`, with their licences.
 | Task | Command |
 |---|---|
 | Health overview | `./status.sh` |
-| Log | `logs/fetcher.log` (rotating), or `journalctl -u hub75-fetcher` |
+| Log | `logs/fetcher.log` (rotating), or `journalctl -u hub75-fetcher`; network repairs: `logs/netwatch.log` |
 | Test the API connection | `python3 fetcher/fetcher.py --check` |
 | Dry run (prints the display file) | `python3 fetcher/fetcher.py --once` |
 | Preview another time of day | `./pretend.sh "mon 10:00"` … `./pretend.sh off` (turns itself off after 30 min) |
 | Draw a sample without live data | stop `hub75-ticker`, then `sudo ticker/ticker --display=ticker/samples/after.txt --stale-after=0` |
 | Unit tests | `cd fetcher && python3 -m unittest discover tests` |
 | Ticker smoke test | `bash tests/ticker_samples.sh` (stop `hub75-ticker` first) |
+| Network watchdog test | `bash tests/netwatch_test.sh` (no root, no network) |
 
 ## Troubleshooting
 
@@ -123,7 +126,8 @@ font sizes. The bundled fonts are in `fonts/`, with their licences.
 |---|---|
 | Panel dark, services running | Panel settings changed: re-run `calibrate`. |
 | Scrambled or doubled image | Re-run `calibrate`. |
-| `STALE` | Network is down, or the fetcher stopped. Check the log. |
+| `! NO NETWORK 12m` | The Pi can't resolve names or connect: Wi-Fi, router or DNS. After 10 min the network watchdog (`deploy/netwatch.sh`, a systemd timer set up by `install.sh`) restarts tailscaled (if installed) and reconnects Wi-Fi via NetworkManager, repeating every 10 min. It never reboots. What it did is in `logs/netwatch.log`. |
+| `STALE` | No fresh quotes for 5 min, but the network is fine: the fetcher stopped or tastytrade is failing. Check `logs/fetcher.log`. |
 | `! AUTH` | The grant was deleted or the secret regenerated: create a new grant. Don't restart in a loop; each start is a login attempt. |
 | Every tastytrade request times out | The IP is blocked after failed logins (~8 h). Wait it out. |
 | `! QUOTES HTTP 403` | REST quotes need a funded account. |

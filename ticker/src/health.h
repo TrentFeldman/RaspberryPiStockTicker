@@ -3,6 +3,9 @@
 //   HealthText  the red text shown in place of a label when something's wrong:
 //                 "NO DATA YET"   the fetcher hasn't had a good quote refresh yet
 //                 "STALE 12m"     no good quote refresh for over --stale-after (5 min)
+//                 "! NO NETWORK 12m"   the Pi can't reach the internet (DNS or
+//                                 connection trouble). Once the data is stale
+//                                 it replaces "STALE", because it's the cause.
 //                 "! AUTH 400 invalid_grant"   the fetcher's status (alternates
 //                                 with the normal label every 3 s)
 //   DrawNoData  the whole-screen "NO DATA" message (display.txt unreadable,
@@ -30,6 +33,7 @@ inline std::string HealthText(const Display &d, bool loaded, time_t now, int sta
     if (d.updated <= 0) return "NO DATA YET";
     const long age = now - d.updated;
     if (age > stale_after) {
+      if (d.status.rfind("NO NETWORK", 0) == 0) return "! " + d.status.substr(0, 23);  // the cause, not just "STALE"
       return age < 5400 ? "STALE " + std::to_string(age / 60) + "m"
                         : "STALE " + std::to_string(age / 3600) + "h";
     }

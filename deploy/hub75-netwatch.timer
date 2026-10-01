@@ -1,0 +1,10 @@
+# Runs hub75-netwatch.service every 2 minutes, starting 3 minutes after boot.
+[Unit]
+Description=hub75 network watchdog, every 2 minutes
+
+[Timer]
+OnBootSec=3min
+OnUnitActiveSec=2min
+
+[Install]
+WantedBy=timers.target

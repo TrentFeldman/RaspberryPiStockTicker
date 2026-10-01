@@ -53,10 +53,12 @@ from .web import ApiError, AuthError
 
 SOURCE_NAMES = ("sessions", "quotes", "rack", "account", "instruments", "weather")
 
-# The panel shows one problem at a time: the first failing source in this
-# order (after AUTH, which always wins), with its label.
+# The panel shows one problem at a time. NO NETWORK wins (it's the cause of
+# every other error); then AUTH; then the first failing source in this order,
+# with its label.
 STATUS_LABELS = (("quotes", "QUOTES"), ("rack", "QUOTES"), ("sessions", "SESSIONS"),
                  ("account", "ACCOUNT"))
+NETWORK_DOWN_AFTER = 60  # seconds of "no network" before the panel says so (single blips are normal)
 
 
 class Fetcher:
@@ -84,6 +86,10 @@ class Fetcher:
         # Login-failure pause (see _run).
         self.auth_blocked_until = 0.0
         self.auth_error: str | None = None    # short text for the panel while paused
+
+        # When requests started failing with "no network" (DNS or connection
+        # trouble). Any request that succeeds clears it: it proves the network works.
+        self.net_down_since: float | None = None
 
         self.last_heartbeat = 0.0
         self.last_written: str | None = None  # display.txt body last written (skip identical writes)
@@ -183,7 +189,7 @@ class Fetcher:
         st.quotes = self.rotation.on_screen(mode)
         st.account = self.account.value
         st.weather = self.weather.current(now)
-        st.status = self.status_line()
+        st.status = self.status_line(now)
         self.write_display()
         self.heartbeat(now)
 
@@ -201,6 +207,7 @@ class Fetcher:
         try:
             fn()
             src.succeeded(now, interval)
+            self.net_down_since = None
         except AuthError as e:
             backoff = self.cfg.intervals["auth_backoff"]
             self.auth_blocked_until = time.time() + backoff
@@ -214,6 +221,8 @@ class Fetcher:
             if not isinstance(e, ApiError):
                 log.exception("%s: unexpected error", name)  # a bug, not an API problem: log the traceback
             src.failed(now, e, interval)
+            if src.panel_error == "no network" and self.net_down_since is None:
+                self.net_down_since = now
 
     # -- individual refreshes that belong to no other part -----------------
 
@@ -243,8 +252,10 @@ class Fetcher:
         except OSError as e:
             log.error("cannot write display file %s: %s", self.cfg.display, e)
 
-    def status_line(self) -> str:
+    def status_line(self, now: float) -> str:
         """The most important problem, short enough for the panel ("ok" if none)."""
+        if self.net_down_since is not None and now - self.net_down_since >= NETWORK_DOWN_AFTER:
+            return "NO NETWORK " + duration(now - self.net_down_since)  # "NO NETWORK 12m"
         if self.auth_error:
             return "AUTH " + self.auth_error
         for name, label in STATUS_LABELS:
